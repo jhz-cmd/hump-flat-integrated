@@ -751,7 +751,7 @@ code{background:var(--bg);border:1px solid var(--border-light);border-radius:5px
           <button class="btn primary" id="btn-classify-send">一键传送到平面调车 →</button>
           <button class="btn ghost" id="btn-classify-archive">下载完整衔接档案</button>
         </div>
-        <div class="hint">导出格式与平面调车平台（SAN 弧模型 + A* 求解器）输入完全一致，采用其「论文模式」：<code>goalMode:'paper'</code>＋<code>destinationOrder</code>（去向集结顺序），仅需 <code>initial</code> 初始状态，由算法自动把各去向车组按顺序集结成一列出发车列。<code>cars</code>＝每辆车 <code>{id, destination, length}</code>（去向即编组组号）；<code>tracks</code>＝各股道 <code>{name, capacity, initial, goal:[]}</code>；<code>headshunt</code> 牵出线长、<code>locomotive</code> 机车长。可在其平台点「从驼峰平台导入」一键载入后拖拽微调。</div>
+        <div class="hint">导出格式与平面调车平台（SAN 弧模型 + A* 求解器）输入完全一致，采用其「论文模式」：<code>goalMode:'paper'</code>＋<code>destinationOrder</code>（去向集结顺序），仅需 <code>initial</code> 初始状态，由算法自动把各去向车组按顺序集结成一列出发车列。<code>cars</code>＝每辆车 <code>{id, destination, length}</code>（去向即编组组号）；<code>tracks</code>＝各股道 <code>{name, capacity, initial, goal:[]}</code>；<code>headshunt</code> 牵出线长、<code>locomotive</code> 机车长。已设 <code>poolSize:0</code>（SAN 解池不截断），默认 12 车可稳定得到 3 轮可行解；浏览器求解器对较大算例<b>只保证可行、不保证全局最优</b>。可在其平台点「从驼峰平台导入」一键载入后拖拽微调。</div>
       </div>
     </div>
   </div>
@@ -2723,6 +2723,8 @@ function buildClassifyConfig(r, nTrack, effLen, headshunt, loco){
   // 注意：paper 模式下 FD4 只校验 initial（每车恰好一次、每股道≤容量）与
   // 「至少一股道容量 ≥ 全车总长」，不校验 goal；但其 app.js 会对 t.goal.join(',')，
   // 故每股道仍需带 goal:[] 空数组，否则导入时报错。
+  // poolSize:0 表示 SAN 解池「不截断」——实测 12 车/4 股道纸模式若按默认 100 截断，
+  // 会因丢掉通往目标的中间动作而「预算内未找到」；不截断则稳定得到 3 轮可行解（不证最优）。
   const plan=classifyGoalPlan(r);
   const cars=r.cars.map(c=>({ id:c.id, destination:c.dest, length:Math.round(c.length*10)/10 }));
   const tracks=r.names.map(n=>({ name:n, capacity:effLen, initial:r.tracks[n].cars.map(c=>c.id), goal:[] }));
@@ -2730,7 +2732,7 @@ function buildClassifyConfig(r, nTrack, effLen, headshunt, loco){
     goalMode:'paper', destinationOrder:plan.destOrder,
     cars, tracks,
     headshunt:headshunt, locomotive:loco,
-    objective:'time', timeLimit:30, weight:350, poolSize:100, initialTrack:1
+    objective:'time', timeLimit:30, weight:350, poolSize:0, initialTrack:1
   };
 }
 function buildClassifyJSON(r, nTrack, effLen, headshunt, loco){
