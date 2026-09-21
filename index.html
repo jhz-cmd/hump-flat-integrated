@@ -3,143 +3,259 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>驼峰调车—平面调车一体化优化平台</title>
+<title>驼峰调车—平面调车 一体化优化平台</title>
 <style>
   :root{
     --blue:#2563eb; --blue-dark:#1d4ed8; --blue-soft:#eff6ff; --ink:#0f172a;
     --muted:#475569; --line:#e2e8f0; --amber:#f59e0b; --amber-soft:#fef3c7;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;color:var(--ink);background:linear-gradient(180deg,#eff6ff 0%,#ffffff 320px);min-height:100vh}
-  .wrap{max-width:1000px;margin:0 auto;padding:48px 24px 80px}
-  header{text-align:center;margin-bottom:8px}
-  .kicker{display:inline-block;font-size:12px;letter-spacing:2px;color:var(--blue);background:var(--blue-soft);border:1px solid #dbeafe;padding:5px 14px;border-radius:999px;margin-bottom:18px;font-weight:600}
-  h1{font-size:clamp(26px,4.5vw,40px);font-weight:800;line-height:1.25;color:#0b1220}
+  html,body{height:100%}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;color:var(--ink);background:#f1f5f9;overflow:hidden}
+
+  /* ===== 顶部导航（常驻，任意位置都能切换两个平台） ===== */
+  #shell{height:100%;display:flex;flex-direction:column}
+  header.top{background:#fff;border-bottom:1px solid var(--line);box-shadow:0 2px 10px rgba(15,23,42,.06);z-index:10;flex:none}
+  .bar{display:flex;align-items:center;gap:14px;padding:9px 18px;max-width:1280px;margin:0 auto;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;cursor:pointer}
+  .brand .logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#2563eb,#1d4ed8);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:15px;flex:none}
+  .brand .name{font-size:14.5px;font-weight:800;color:#0b1220;line-height:1.2}
+  .brand .name small{display:block;font-weight:500;font-size:11px;color:var(--muted)}
+  nav.tabs{display:flex;gap:4px;margin-left:auto;background:#f1f5f9;padding:4px;border-radius:12px;flex-wrap:wrap}
+  nav.tabs button{appearance:none;border:0;background:transparent;font:inherit;font-size:13px;font-weight:600;color:var(--muted);padding:8px 14px;border-radius:9px;cursor:pointer;white-space:nowrap;transition:color .15s,background .15s,box-shadow .15s}
+  nav.tabs button:hover{color:var(--ink)}
+  nav.tabs button.active{background:#fff;color:var(--blue);box-shadow:0 1px 4px rgba(15,23,42,.14)}
+  nav.tabs button.active.flat{color:#b45309}
+
+  /* 流程步骤条 */
+  .stepper{background:var(--blue-soft);border-top:1px solid #dbeafe;padding:6px 18px;overflow-x:auto}
+  .stepper .inner{display:flex;align-items:center;gap:7px;margin:0 auto;max-width:1280px;justify-content:center}
+  .step{display:flex;align-items:center;gap:6px;font-size:12px;color:#94a3b8;white-space:nowrap}
+  .step .dot{width:20px;height:20px;border-radius:50%;background:#e2e8f0;color:#64748b;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
+  .step.on{color:#1e40af;font-weight:600}
+  .step.on .dot{background:var(--blue);color:#fff}
+  .step.on.amber{color:#92400e}
+  .step.on.amber .dot{background:var(--amber);color:#fff}
+  .step.conn{width:20px;height:2px;background:#cbd5e1;flex:none}
+
+  /* ===== 内容区：两个平台 iframe + 项目介绍 ===== */
+  main#content{flex:1;position:relative;min-height:0}
+  .view{position:absolute;inset:0}
+  .view[hidden]{display:none}
+  .view iframe{width:100%;height:100%;border:0;display:block;background:#fff}
+
+  /* 项目介绍页 */
+  .view.intro{overflow-y:auto;background:linear-gradient(180deg,#eff6ff 0%,#fff 380px)}
+  .wrap{max-width:960px;margin:0 auto;padding:34px 24px 70px}
+  header.hero{text-align:center;margin-bottom:6px}
+  .kicker{display:inline-block;font-size:12px;letter-spacing:2px;color:var(--blue);background:var(--blue-soft);border:1px solid #dbeafe;padding:5px 14px;border-radius:999px;margin-bottom:16px;font-weight:600}
+  h1{font-size:clamp(24px,4.2vw,38px);font-weight:800;line-height:1.25;color:#0b1220}
   h1 .grad{background:linear-gradient(90deg,#2563eb,#1e40af);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-  .lead{margin:16px auto 0;max-width:720px;color:var(--muted);font-size:15px;line-height:1.8}
-  .badges{margin-top:18px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+  .lead{margin:14px auto 0;max-width:720px;color:var(--muted);font-size:14.5px;line-height:1.85}
+  .badges{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
   .tag{font-size:12px;color:#1e40af;background:#fff;border:1px solid var(--line);padding:4px 12px;border-radius:999px}
   .tag.amber{color:#92400e;background:#fffbeb;border-color:#fde68a}
-  .flow{margin:34px auto 8px;max-width:760px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 26px;box-shadow:0 8px 24px rgba(37,99,235,.06)}
+  .flow{margin:30px auto 6px;max-width:760px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 26px;box-shadow:0 8px 24px rgba(37,99,235,.06)}
   .flow h2{font-size:15px;color:#0b1220;margin-bottom:14px;display:flex;align-items:center;gap:8px}
   .flow h2::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--blue);display:inline-block}
-  .flow-step{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:13.5px;color:var(--muted)}
-  .flow-node{background:var(--blue-soft);border:1px solid #dbeafe;color:#1e40af;font-weight:600;padding:8px 14px;border-radius:10px;white-space:nowrap}
+  .flow-step{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+  .flow-node{background:var(--blue-soft);border:1px solid #dbeafe;color:#1e40af;font-weight:600;padding:8px 13px;border-radius:10px;white-space:nowrap}
   .flow-node.flat{background:var(--amber-soft);border-color:#fde68a;color:#92400e}
   .flow-arrow{color:#94a3b8;font-weight:700}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;margin-top:34px}
-  .part{position:relative;background:#fff;border:1px solid var(--line);border-radius:20px;padding:26px;text-decoration:none;color:inherit;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;display:block;box-shadow:0 6px 18px rgba(15,23,42,.05)}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-top:30px}
+  .part{position:relative;background:#fff;border:1px solid var(--line);border-radius:20px;padding:24px;text-align:left;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;box-shadow:0 6px 18px rgba(15,23,42,.05);font:inherit;color:inherit}
   .part:hover{transform:translateY(-4px);box-shadow:0 16px 32px rgba(37,99,235,.14);border-color:#bfdbfe}
-  .part .no{position:absolute;top:18px;right:20px;font-size:12px;font-weight:700;letter-spacing:1px;color:#94a3b8}
-  .mascot{width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+  .part.amber:hover{box-shadow:0 16px 32px rgba(245,158,11,.16);border-color:#fde68a}
+  .part .no{position:absolute;top:16px;right:18px;font-size:11px;font-weight:700;letter-spacing:1px;color:#94a3b8}
+  .mascot{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
   .mascot.blue{background:linear-gradient(135deg,#2563eb,#1d4ed8)}
   .mascot.amber{background:linear-gradient(135deg,#f59e0b,#d97706)}
-  .part h2{font-size:20px;font-weight:800;color:#0b1220;margin-bottom:6px}
+  .part h2{font-size:18px;font-weight:800;color:#0b1220;margin-bottom:6px}
   .part .sub{font-size:13px;color:var(--muted);line-height:1.7;min-height:44px}
-  .part .go{display:inline-flex;align-items:center;gap:6px;margin-top:18px;font-size:14px;font-weight:700;color:var(--blue)}
+  .part .go{display:inline-flex;align-items:center;gap:6px;margin-top:16px;font-size:14px;font-weight:700;color:var(--blue)}
   .part.amber .go{color:#b45309}
   .go::after{content:"→";transition:transform .18s ease}
   .part:hover .go::after{transform:translateX(4px)}
-  .bridge{margin-top:34px;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
-  .bridge h3{font-size:15px;color:#0b1220;padding:16px 22px;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between;background:#f8fafc}
+
+  .bridge{margin-top:30px;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  .bridge h3{font-size:14.5px;color:#0b1220;padding:14px 20px;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between;background:#f8fafc}
   .bridge h3 .tog{color:var(--blue);font-size:13px;transition:transform .2s}
   .bridge.open h3 .tog{transform:rotate(90deg)}
-  .bridge .body{display:none;padding:20px 24px;border-top:1px solid var(--line)}
+  .bridge .body{display:none;padding:18px 22px;border-top:1px solid var(--line)}
   .bridge.open .body{display:block}
-  .bridge .body p{font-size:13.5px;color:var(--muted);line-height:1.9;margin-bottom:10px}
+  .bridge .body p{font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:10px}
   .bridge .body b{color:#0b1220}
   .bridge .body .steps{margin:6px 0 0;padding-left:0;list-style:none}
-  .bridge .body .steps li{font-size:13.5px;color:var(--muted);line-height:1.9;padding-left:26px;position:relative;margin-bottom:6px}
+  .bridge .body .steps li{font-size:13px;color:var(--muted);line-height:1.9;padding-left:26px;position:relative;margin-bottom:6px}
   .bridge .body .steps li::before{content:attr(data-n);position:absolute;left:0;top:2px;width:18px;height:18px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
-  footer{margin-top:40px;text-align:center;color:#94a3b8;font-size:12px;line-height:1.8}
-  footer .tags{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:8px}
-  @media(max-width:560px){.flow-step{flex-direction:column;align-items:flex-start}.flow-arrow{transform:rotate(90deg)}}
+
+  footer{margin-top:34px;text-align:center;color:#94a3b8;font-size:12px;line-height:1.8}
+  @media(max-width:640px){.flow-step{flex-direction:column;align-items:flex-start}.flow-arrow{transform:rotate(90deg)}nav.tabs{order:2;width:100%}.bar{row-gap:8px}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <span class="kicker">北京市大学生交通科技大赛 · 第十四届</span>
-    <h1>驼峰调车 — <span class="grad">平面调车</span> 一体化优化平台</h1>
-    <p class="lead">把「驼峰峰高 / 纵断面多目标优化 + 解体溜放分配」与「平面调车 SAN 弧模型 + A* 方案」串成一条完整链路：车辆经峰顶按去向溜入分类线，再经峰尾牵出线集结成出发车列。</p>
-    <div class="badges">
-      <span class="tag">第一部分 · 驼峰调车（本人项目）</span>
-      <span class="tag amber">第二部分 · 平面调车（同学项目）</span>
-      <span class="tag">依据《铁路站场及枢纽》教材 · TB10062-2018</span>
+<div id="shell">
+  <header class="top">
+    <div class="bar">
+      <a class="brand" onclick="setTab('intro')">
+        <span class="logo">驼</span>
+        <span class="name">驼峰调车 — 平面调车<small>一体化优化平台</small></span>
+      </a>
+      <nav class="tabs">
+        <button data-tab="intro" class="active">项目介绍</button>
+        <button data-tab="hump">第一部分 · 驼峰调车</button>
+        <button data-tab="flat" class="flat">第二部分 · 平面调车</button>
+      </nav>
     </div>
+    <div class="stepper"><div class="inner">
+      <span class="step" data-s="1"><span class="dot">1</span>峰高 / 纵断面</span>
+      <span class="conn"></span>
+      <span class="step" data-s="2"><span class="dot">2</span>解体溜放分配</span>
+      <span class="conn"></span>
+      <span class="step" data-s="3"><span class="dot">3</span>导出初始状态</span>
+      <span class="conn"></span>
+      <span class="step" data-s="4"><span class="dot">4</span>平面调车编组</span>
+    </div></div>
   </header>
 
-  <div class="flow">
-    <h2>数据流</h2>
-    <div class="flow-step">
-      <span class="flow-node">① 驼峰解体<br>峰高 / 推峰速度</span>
-      <span class="flow-arrow">→</span>
-      <span class="flow-node">② 溜放分配<br>去向 → 分类线</span>
-      <span class="flow-arrow">→</span>
-      <span class="flow-node">③ 导出初始状态<br>JSON（paper 模式）</span>
-      <span class="flow-arrow">→</span>
-      <span class="flow-node flat">④ 平面调车<br>SAN + A* 集结编组</span>
-    </div>
-  </div>
+  <main id="content">
+    <!-- 项目介绍 -->
+    <div id="view-intro" class="view intro">
+      <div class="wrap">
+        <header class="hero">
+          <span class="kicker">北京市大学生交通科技大赛 · 第十四届</span>
+          <h1>驼峰调车 — <span class="grad">平面调车</span> 一体化优化平台</h1>
+          <p class="lead">把「驼峰峰高 / 纵断面多目标优化 + 解体溜放分配」与「平面调车 SAN 弧模型 + A* 方案」放在同一个平台里连续完成：车辆经峰顶按去向溜入分类线，再经峰尾牵出线集结成出发车列。顶部标签可随时在两部分之间切换，数据自动衔接。</p>
+          <div class="badges">
+            <span class="tag">第一部分 · 驼峰调车（本人项目）</span>
+            <span class="tag amber">第二部分 · 平面调车（同学项目）</span>
+            <span class="tag">依据《铁路站场及枢纽》教材 · TB10062-2018</span>
+          </div>
+        </header>
 
-  <div class="grid">
-    <a class="part" href="hump.html">
-      <span class="no">PART 01</span>
-      <div class="mascot blue" aria-hidden="true">
-        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-          <path d="M4 30 L14 14 L20 22 L28 8 L36 30 Z" fill="#fff" opacity=".95"/>
-          <circle cx="14" cy="13" r="2.2" fill="#2563eb"/><circle cx="15.4" cy="12.4" r=".7" fill="#fff"/><circle cx="13" cy="12.4" r=".7" fill="#fff"/>
-          <path d="M12.6 15.4 Q14 17 15.4 15.4" stroke="#1d4ed8" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-        </svg>
+        <div class="flow">
+          <h2>数据流</h2>
+          <div class="flow-step">
+            <span class="flow-node">① 驼峰解体<br>峰高 / 推峰速度</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node">② 溜放分配<br>去向 → 分类线</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node">③ 导出初始状态<br>JSON（paper 模式）</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node flat">④ 平面调车<br>SAN + A* 集结编组</span>
+          </div>
+        </div>
+
+        <div class="grid">
+          <button class="part" onclick="setTab('hump')">
+            <span class="no">PART 01</span>
+            <div class="mascot blue" aria-hidden="true">
+              <svg width="34" height="34" viewBox="0 0 40 40" fill="none">
+                <path d="M4 30 L14 14 L20 22 L28 8 L36 30 Z" fill="#fff" opacity=".95"/>
+                <circle cx="14" cy="13" r="2.2" fill="#2563eb"/><circle cx="15.4" cy="12.4" r=".7" fill="#fff"/><circle cx="13" cy="12.4" r=".7" fill="#fff"/>
+                <path d="M12.6 15.4 Q14 17 15.4 15.4" stroke="#1d4ed8" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h2>第一部分 · 驼峰调车</h2>
+            <div class="sub">峰高与纵断面（加速坡 / 中间坡 / 道岔区坡 / 打靶区）多目标优化，减速器 / 减速顶配置，能高线检算，以及解体溜放分配与「一键传送」衔接数据。</div>
+            <span class="go">进入驼峰调车平台</span>
+          </button>
+
+          <button class="part amber" onclick="setTab('flat')">
+            <span class="no">PART 02</span>
+            <div class="mascot amber" aria-hidden="true">
+              <svg width="34" height="34" viewBox="0 0 40 40" fill="none">
+                <g stroke="#fff" stroke-width="2.4" stroke-linecap="round">
+                  <path d="M6 12 H34"/><path d="M6 20 H34"/><path d="M6 28 H34"/><path d="M6 12 L12 20 L6 28"/>
+                </g>
+                <rect x="26" y="9" width="10" height="6" rx="2" fill="#fff"/><rect x="26" y="17" width="10" height="6" rx="2" fill="#fff"/><rect x="26" y="25" width="10" height="6" rx="2" fill="#fff"/>
+              </svg>
+            </div>
+            <h2>第二部分 · 平面调车</h2>
+            <div class="sub">SAN 弧模型 + 加权 A*（浏览器内置 / Gurobi 后端两种引擎），论文式时间模型（4.19–4.23），支持「论文去向聚集」与「自定义精确终态」，可一键导入第一部分初始状态。</div>
+            <span class="go">进入平面调车平台</span>
+          </button>
+        </div>
+
+        <div class="bridge" id="bridge">
+          <h3 data-toggle><span>衔接说明（点击展开）</span><span class="tog">▸</span></h3>
+          <div class="body">
+            <p><b>为什么分两步：</b>驼峰解体只是调车作业的前半程——车辆经峰顶溜放进入各分类线（调车线）后，还需由机车在峰尾牵出线进行平面调车（取车、推进、转线、编组）。两部分通过「初始状态 JSON」交接，在同一平台内无缝完成。</p>
+            <ul class="steps">
+              <li data-n="1">在<b>第一部分</b>「解体与溜放分配」页录入待解体车列，平台按编组去向分配各分类线。</li>
+              <li data-n="2">点击<b>「一键传送到平面调车」</b>，数据（paper 模式初始状态 + 去向顺序）写入浏览器本地存储并自动切换到第二部分。</li>
+              <li data-n="3">第二部分自动<b>「从驼峰平台导入」</b>，填充车辆 / 股道 / 去向顺序，点「开始求解」得到集结编组方案与全程调车时间。</li>
+              <li data-n="4">两部分结果合起来，即为「驼峰解体 + 平面调车」的完整时间与方案。</li>
+            </ul>
+          </div>
+        </div>
+
+        <footer>
+          <div class="tags" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:8px">
+            <span class="tag">《铁路站场及枢纽》教材 · 第四篇 P178–P239</span>
+            <span class="tag">TB10062-2018 规范</span>
+            <span class="tag">MOPSO / NSGA-II / ALNS</span>
+            <span class="tag amber">SAN + A*</span>
+          </div>
+          <div>本平台为教学演示与数值实验原型；成本 / 能力 / 时间为估算值，正式设计请以规范全文与工程定额校准。</div>
+        </footer>
       </div>
-      <h2>第一部分 · 驼峰调车</h2>
-      <div class="sub">峰高与纵断面（加速坡 / 中间坡 / 道岔区坡 / 打靶区）多目标优化，减速器 / 减速顶配置，能高线检算，以及解体溜放分配与「一键传送」衔接数据。</div>
-      <span class="go">进入驼峰调车平台</span>
-    </a>
-
-    <a class="part amber" href="flat/index.html">
-      <span class="no">PART 02</span>
-      <div class="mascot amber" aria-hidden="true">
-        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-          <g stroke="#fff" stroke-width="2.4" stroke-linecap="round">
-            <path d="M6 12 H34"/><path d="M6 20 H34"/><path d="M6 28 H34"/><path d="M6 12 L12 20 L6 28"/>
-          </g>
-          <rect x="26" y="9" width="10" height="6" rx="2" fill="#fff"/><rect x="26" y="17" width="10" height="6" rx="2" fill="#fff"/><rect x="26" y="25" width="10" height="6" rx="2" fill="#fff"/>
-        </svg>
-      </div>
-      <h2>第二部分 · 平面调车</h2>
-      <div class="sub">SAN 弧模型 + 加权 A*（浏览器内置 / Gurobi 后端两种引擎），论文式时间模型（4.19–4.23），支持「论文去向聚集」与「自定义精确终态」，可一键导入第一部分初始状态。</div>
-      <span class="go">进入平面调车平台</span>
-    </a>
-  </div>
-
-  <div class="bridge" id="bridge">
-    <h3 data-toggle><span>衔接说明（点击展开）</span><span class="tog">▸</span></h3>
-    <div class="body">
-      <p><b>为什么分两步：</b>驼峰解体只是调车作业的前半程——车辆经峰顶溜放进入各分类线（调车线）后，还需由机车在峰尾牵出线进行平面调车（取车、推进、转线、编组）。两部分通过「初始状态 JSON」交接。</p>
-      <ul class="steps">
-        <li data-n="1">在<b>第一部分</b>「解体与溜放分配」页录入待解体车列，平台按编组去向分配各分类线。</li>
-        <li data-n="2">点击<b>「一键传送到平面调车」</b>，数据（paper 模式初始状态 + 去向顺序）写入浏览器本地存储并跳转到第二部分。</li>
-        <li data-n="3">在<b>第二部分</b>点<b>「从驼峰平台导入」</b>，自动填充车辆 / 股道 / 去向顺序，点「开始求解」得到集结编组方案与全程调车时间。</li>
-        <li data-n="4">两部分结果合起来，即为「驼峰解体 + 平面调车」的完整时间与方案。</li>
-      </ul>
     </div>
-  </div>
 
-  <footer>
-    <div class="tags">
-      <span class="tag">《铁路站场及枢纽》教材 · 第四篇 P178–P239</span>
-      <span class="tag">TB10062-2018 规范</span>
-      <span class="tag">MOPSO / NSGA-II / ALNS</span>
-      <span class="tag amber">SAN + A*</span>
+    <!-- 第一部分：驼峰调车 -->
+    <div id="view-hump" class="view" hidden>
+      <iframe id="frame-hump" src="hump.html" title="第一部分 · 驼峰调车"></iframe>
     </div>
-    <div>本平台为教学演示与数值实验原型；成本 / 能力 / 时间为估算值，正式设计请以规范全文与工程定额校准。</div>
-  </footer>
+
+    <!-- 第二部分：平面调车 -->
+    <div id="view-flat" class="view" hidden>
+      <iframe id="frame-flat" src="flat/index.html" title="第二部分 · 平面调车"></iframe>
+    </div>
+  </main>
 </div>
 
 <script>
+  var FRAME_HUMP=document.getElementById('frame-hump');
+  var FRAME_FLAT=document.getElementById('frame-flat');
+
+  function setTab(t){
+    ['intro','hump','flat'].forEach(function(k){
+      document.getElementById('view-'+k).hidden = (k!==t);
+      var btn=document.querySelector('nav.tabs button[data-tab="'+k+'"]');
+      if(btn) btn.classList.toggle('active', k===t);
+    });
+    document.querySelectorAll('.stepper .step').forEach(function(s){
+      var n=+s.dataset.s;
+      s.classList.remove('on','amber');
+      if(t==='hump' && (n===1||n===2)) s.classList.add('on');
+      if(t==='flat' && (n===3||n===4)) s.classList.add('on','amber');
+    });
+  }
+  document.querySelectorAll('nav.tabs button').forEach(function(b){
+    b.addEventListener('click',function(){ setTab(b.dataset.tab); });
+  });
+
+  // 让 iframe 内的应用能“顶到父窗口切换标签页”（同源），并回传自动导入指令
+  function postToFlat(){
+    try{
+      if(FRAME_FLAT.contentWindow){
+        FRAME_FLAT.contentWindow.postMessage({type:'hump-flat-switch'}, '*');
+      }else{
+        FRAME_FLAT.addEventListener('load',function(){ FRAME_FLAT.contentWindow.postMessage({type:'hump-flat-switch'},'*'); },{once:true});
+      }
+    }catch(_){}
+  }
+  window.addEventListener('message',function(e){
+    if(e.data && e.data.type==='hump-flat-switch'){
+      setTab('flat');
+      postToFlat();
+    }
+  });
+
+  // 衔接说明折叠
   var bridge=document.getElementById('bridge');
-  bridge.querySelector('[data-toggle]').addEventListener('click',function(){ bridge.classList.toggle('open'); });
+  if(bridge) bridge.querySelector('[data-toggle]').addEventListener('click',function(){ bridge.classList.toggle('open'); });
 </script>
 </body>
 </html>

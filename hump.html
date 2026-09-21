@@ -2866,14 +2866,22 @@ function currentClassify(){
   const r=classifyAssign(cars, nTrack, effLen);
   return { r, nTrack, effLen, headshunt, loco };
 }
-/* 一键传送到平面调车：把 paper 配置写入 localStorage（同源共享），再跳转到 flat/index.html */
+/* 一键传送到平面调车：把 paper 配置写入 localStorage（同源共享），再切换到第二部分。
+ * 一体化外壳（index.html 的 iframe）内：通知父窗口切换标签页并自动导入；
+ * 独立打开 hump.html 时：退回整页跳转 flat/index.html。 */
 function sendClassifyToFlat(){
   const c=currentClassify(); if(!c){ toast('请先录入并解析车列'); return; }
   const cfg=buildClassifyConfig(c.r, c.nTrack, c.effLen, c.headshunt, c.loco);
   try{ localStorage.setItem('hump-flat-handoff', JSON.stringify(cfg)); }
   catch(e){ toast('浏览器禁止本地存储，无法传送，请改用「复制 JSON」'); return; }
-  toast('已传送，即将打开平面调车平台…');
-  setTimeout(()=>{ location.href='flat/index.html'; }, 400);
+  toast('已传送，正在切换到平面调车平台…');
+  setTimeout(()=>{
+    if(window.parent && window.parent!==window){
+      window.parent.postMessage({type:'hump-flat-switch'}, '*');
+    }else{
+      location.href='flat/index.html';
+    }
+  }, 300);
 }
 /* 下载完整衔接档案（yard/cars 全字段 + humpResult + flatInput） */
 function downloadClassifyArchive(){

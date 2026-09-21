@@ -379,6 +379,17 @@ function runImportFromHump(){
   }catch(e){ error(e.message||'导入失败'); }
 }
 $('#importFromHump').addEventListener('click',runImportFromHump);
+/* 一体化外壳内：父窗口（index.html）切换到本标签页后回传指令，自动跳过封面并导入，无需再手动点按钮 */
+window.addEventListener('message',function(e){
+  if(e.data && e.data.type==='hump-flat-switch'){
+    try{
+      document.body.classList.remove('cover-active');
+      $('#coverPage').hidden=true;
+      switchView('setup');
+      runImportFromHump();
+    }catch(_){}
+  }
+});
 /* 从驼峰平台跳转而来（带传送配置）时，自动跳过封面进入「状态设置」视图，使导入按钮立即可见 */
 (function(){
   try{
